@@ -48,6 +48,10 @@
 </section>
 
 <section>
+  <img src="img/keanu.jpg" alt="wat."/>
+</section>
+
+<section>
   <h1>Anti-patterns</h1>
 </section>
 
@@ -60,6 +64,8 @@
   <h1>You can learn from my mistakes</h1>
 </section>
 
+
+
 <section>
   <img src="img/initial_commit.jpg" alt="wat."/>
 </section>
@@ -70,21 +76,141 @@
 </section>
 
 <section>
-  
+  <img src="img/cat.jpg" alt="json!" />
+  <pre><code>
+  rails new rabl-slides-demo
+  </code></pre>
+</section>
+
+<section>
+  <pre><code>
+  rails g scaffold post title:string body:text
+  </code></pre>
+  <pre><code class="ruby">
+  class CreatePosts < ActiveRecord::Migration
+    def change
+      create_table :posts do |t|
+       t.string :title
+        t.text :body
+
+        t.timestamps
+      end
+    end
+  end
+  </code></pre>
+  <pre><code class="ruby">
+  class Post < ActiveRecord::Base
+  end
+  </code></pre>
 </section>
 
 
 
+<section>
+  <img src="img/fever.jpg" alt="wat." />
+  <h2>And the only prescrition</h2>
+  <h2>is more JSON!</h2>
+</section>
 
 
+<section>
+<h2>A naive approach</h2>
+<pre class="fragment fade-in"><code>
+class PostsController < ApplicationController
+  def show
+    @post = Post.find params[:id]
+    render :text => %[{
+      title : "#{@post.title}",
+      body  : "#{@post.body}"
+     }]
+  end
+end
+</code></pre>
+<h2 class="fragment fade-in">Me! Rails 2.something</h2>
+</section>
 
+
+<section>
+  <img src="img/what_has_been_seen.jpg" alt="wat." />
+</section>
+
+
+<section>
+<h2>It's ugly, but it works!</h2>
+<pre><code>GET /posts/1</code></pre>
+<pre><code class="json" data-trim>{
+      title : "Just a test post.",
+      body  : "Here's a bit of text for the body."
+     }
+</code></pre>
+<h2 class="fragment fade-in">Kinda...</h2>
+<h2 class="fragment fade-in">For a while...</h2>
+</section>
+
+
+<section>
+  <h2>One day, a JSON<br/>consumer said:</h2>
+  <img src="img/morpheus.jpg" alt="json!" class="fragment fade-in"/>
+</section>
+
+
+<section>
+<pre><code class="json" data-trim>{
+      title : "Just a test post.",
+      body  : "Here's a bit of text for the "body"."
+     }
+</code></pre>
+</section>
+
+<section>
+  <img src="img/disappoint.jpg" alt="json!" />
+</section>
+
+<section>
+  <img src="img/i_can_fix.jpg" alt="json!" />
+</section>
+
+
+<section>
+<h2>A slight improvement</h2>
+<br/>
+<pre><code>
+    render :text => %[{
+      title : "#{@post.title.gsub('"','\"')}",
+      body  : "#{@post.body.gsub('"','\"')}"
+     }]
+</code></pre>
+<pre><code class="json">{
+      title : "Just a test post",
+      body  : "Here's a bit of text for the \"body\"."
+     }
+</code></pre>
+</section>
 
 <section>
   <img src="img/i_see_it.jpg" alt="wat." />
 </section>
 
 <section>
-  <img src="img/what_has_been_seen.jpg" alt="wat." />
+  <h1>This is a <br/>losing battle.</h1>
+</section>
+
+<section>
+  <h3>Issues with this approach</h3>
+  <br/>
+  <ul>
+    <li class="fragment fade-in">Building strings directly is error prone.</li>
+    <li class="fragment fade-in">The contoller is overloaded.</li>
+    <li class="fragment fade-in">Rails solves this problem already.</li>
+  </ul>
+</section>
+
+<section>
+  <img src="img/one_does_not.jpg" alt="json!" />
+</section>
+
+<section>
+  <h1>The Rails Way</h1>
 </section>
 
 <section>
@@ -92,7 +218,29 @@
 </section>
 
 <section>
+<pre><code>
+class PostsController < ApplicationController
+  def show
+    @post = Post.find(params[:id])
+  end
+end
+</code></pre>
+<pre><code>GET /posts/1.json</code></pre>
+<pre class="fragment fade-in"><code class="json">{
+  "title":"Just a test",
+  "body":"Here's a bit of text for the \"body\".",
+  "created_at":"2013-10-03T05:02:56.901Z",
+  "updated_at":"2013-10-03T05:02:56.901Z"
+}
+</code></pre>
+</section>
+
+<section>
   <img src="img/wat.jpg" alt="wat." />
+</section>
+
+<section>
+  <h2>Rails "magic" at work</h2>
 </section>
 
 <section>
@@ -115,9 +263,7 @@
   <img src="img/json_everywhere.jpg" alt="json!" />
 </section>
 
-<section>
-  <img src="img/disappoint.jpg" alt="json!" />
-</section>
+
 
 <section>
   <img src="img/yuno_view.jpg" alt="json!" />
@@ -136,10 +282,6 @@
 </section>
 
 <section>
-  
-</section>
-
-<section>
   <img src="img/yuno_like.jpg" alt="json!" />
 </section>
 
@@ -147,9 +289,7 @@
   <img src="img/not_bad.jpg" alt="json!" />
 </section>
 
-<section>
-  <img src="img/cat.jpg" alt="json!" />
-</section>
+
 
 <section>
   <img src="img/what_else.jpg" alt="json!" />
@@ -159,17 +299,9 @@
   <img src="img/json_strange.jpg" alt="json!" />
 </section>
 
-<section>
-  <img src="img/morpheus.jpg" alt="json!" />
-</section>
 
-<section>
-  <img src="img/one_does_not.jpg" alt="json!" />
-</section>
 
-<section>
-  <img src="img/i_can_fix.jpg" alt="json!" />
-</section>
+
 
 
 
