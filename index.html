@@ -67,6 +67,7 @@
 
 
 <section>
+  <h3>Then feel like this guy:</h3>
   <img src="img/initial_commit.jpg" alt="wat."/>
 </section>
 
@@ -126,7 +127,11 @@ class PostsController < ApplicationController
   end
 end
 </code></pre>
-<h2 class="fragment fade-in">Me! Rails 2.something</h2>
+</section>
+
+<section>
+<img src="img/walrus.jpg" alt="json!"/>
+<h2 class="fragment fade-in">Rails 2.something</h2>
 </section>
 
 
@@ -210,7 +215,7 @@ end
 </section>
 
 <section>
-  <h1>The Rails Way</h1>
+  <h2>The Rails Way <sup class="fragment fade-in" style="font-size:0.5em;">TM</sup></h2>
 </section>
 
 <section>
@@ -218,6 +223,8 @@ end
 </section>
 
 <section>
+<h3>Schrodinger's Action</h3>
+<h5>Does it do anything?</h5>
 <pre><code>
 class PostsController < ApplicationController
   def show
@@ -244,11 +251,123 @@ end
 </section>
 
 <section>
-  <img src="img/rage.png" alt="wat." />
+  <h2>Behind the scenes</h2>
+  <pre><code>
+  render :json => @post.as_json
+  </code></pre>
+
+  <img src="img/simple.jpg" alt="json!" class="fragment fade-in"/>
 </section>
 
 <section>
-  <img src="img/yodawg.jpg" alt="wat." />
+  <h2><code>as_json</code> customization</h2>
+  <ul>
+    <li><code>:root</code></li>
+    <li><code>:except</code></li>
+    <li><code>:only</code></li>
+    <li><code>:methods</code></li>
+    <li><code>:include</code></li>
+  </ul>
+</section>
+
+<section>
+  <h3>Whitelisting</h3>
+  <pre><code class="ruby">
+  def show
+    @post = Post.find(params[:id])
+    render :json => @post.as_json(:only => [:title, :body])
+  end
+  </code></pre>
+
+  <div class="fragment fade-in">
+  <h3>Blacklisting</h3>
+  <pre><code class="ruby">
+  def show
+    @post = Post.find(params[:id])
+    render :json => @post.as_json(:except => [:created_at, :updated_at])
+  end
+  </code></pre>
+  </div>
+</section>
+
+<section>
+  <h3>Issues with this approach</h3>
+  <br/>
+  <ul>
+    <li class=""><del>Building strings directly is error prone.</del></li>
+    <li class="">The contoller is overloaded.</li>
+    <li class=""><del>Rails solves this problem already.</del></li>
+  </ul>
+</section>
+
+<section>
+  <pre><code class="ruby">
+  class Post < ActiveRecord::Base
+    def api_json
+      as_json(:except => [:created_at, :updated_at])
+    end
+  end
+  </code></pre>
+  <pre><code class="ruby">
+  def show
+    @post = Post.find(params[:id])
+    render :json => @post.api_json
+  end
+  </code></pre>
+</section>
+
+<section>
+  <h3>Issues with this approach</h3>
+  <br/>
+  <ul>
+    <li class=""><del>Building strings directly is error prone.</del></li>
+    <li class=""><del>The contoller is overloaded.</del></li>
+    <li class=""><del>Rails solves this problem already.</del></li>
+    <li class="fragment fade-in">The model is overloaded.</li>
+  </ul>
+  <br/>
+  <img src="img/rage.png" alt="wat." class="fragment fade-in"/>
+</section>
+
+<section>
+  <h1>The RABL Way</h1>
+  <br/>
+  <h2 class="fragment fade-in">JSON is the view</h2>
+</section>
+
+<section>
+  <pre><code class="ruby">
+  gem "rabl"
+  </code></pre>
+
+  <pre class="fragment fade-in"><code class="ruby">
+  class PostsController < ApplicationController
+    def show
+      @post = Post.find(params[:id])
+    end
+  end
+  </code></pre>
+
+  <pre class="fragment fade-in"><code class="ruby">
+  # app/views/posts/show.json.rabl
+  attributes :title, :body
+  </code></pre>
+
+</section>
+
+<section>
+  <h3>Issues with this approach</h3>
+  <br/>
+  <ul>
+    <li class=""><del>Building strings directly is error prone.</del></li>
+    <li class=""><del>The contoller is overloaded.</del></li>
+    <li class=""><del>Rails solves this problem already.</del></li>
+    <li class=""><del>The model is overloaded.</del></li>
+  </ul>
+</section>
+
+<section>
+  <img src="img/not_bad.jpg" alt="json!" />
 </section>
 
 <section>
@@ -263,6 +382,13 @@ end
   <img src="img/json_everywhere.jpg" alt="json!" />
 </section>
 
+<section>
+  <img src="img/jules.jpg" alt="json!" />
+</section>
+
+<section>
+  <img src="img/jason.jpg" alt="json!" />
+</section>
 
 
 <section>
@@ -273,9 +399,7 @@ end
   <img src="img/yuno_json.jpg" alt="json!" />
 </section>
 
-<section>
-  <img src="img/simple.jpg" alt="json!" />
-</section>
+
 
 <section>
   <img src="img/deeper.jpg" alt="json!" />
@@ -285,9 +409,7 @@ end
   <img src="img/yuno_like.jpg" alt="json!" />
 </section>
 
-<section>
-  <img src="img/not_bad.jpg" alt="json!" />
-</section>
+
 
 
 
