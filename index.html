@@ -38,8 +38,10 @@
 <div class="slides">
 
 <section>
-  <h1>RABL</h1>
   <img src="img/json_all_the_things.jpg" alt="wat." />
+  <h3><code>The Wrong Way</code></h3>
+  <h3><code>The Rails Way</code></h3>
+  <h3><code>The RABL&nbsp; Way</code></h3>
 </section>
 
 <section>
@@ -72,7 +74,7 @@
 </section>
 
 <section>
-  <h2>Already using RABL?</h2>
+  <h2>Already avoiding the Wrong Way or using RABL?</h2>
   <img src="img/proud.jpg" alt="wat." class="fragment fade-in"/>
 </section>
 
@@ -91,7 +93,7 @@
   class CreatePosts < ActiveRecord::Migration
     def change
       create_table :posts do |t|
-       t.string :title
+        t.string :title
         t.text :body
 
         t.timestamps
@@ -256,7 +258,7 @@ end
   render :json => @post.as_json
   </code></pre>
 
-  <img src="img/simple.jpg" alt="json!" class="fragment fade-in"/>
+  <img src="img/what_else.jpg" alt="json!" class="fragment fade-in"/>
 </section>
 
 <section>
@@ -293,7 +295,7 @@ end
 <section>
   <h3>Issues with this approach</h3>
   <br/>
-  <ul>
+  <ul class="fragment fade-in">
     <li class=""><del>Building strings directly is error prone.</del></li>
     <li class="">The contoller is overloaded.</li>
     <li class=""><del>Rails solves this problem already.</del></li>
@@ -302,16 +304,16 @@ end
 
 <section>
   <pre><code class="ruby">
+  def show
+    @post = Post.find(params[:id])
+    render :json => @post.api_json
+  end
+  </code></pre>
+  <pre class="fragment fade-in"><code class="ruby">
   class Post < ActiveRecord::Base
     def api_json
       as_json(:except => [:created_at, :updated_at])
     end
-  end
-  </code></pre>
-  <pre><code class="ruby">
-  def show
-    @post = Post.find(params[:id])
-    render :json => @post.api_json
   end
   </code></pre>
 </section>
@@ -319,14 +321,20 @@ end
 <section>
   <h3>Issues with this approach</h3>
   <br/>
-  <ul>
+  <ul class="fragment fade-in">
     <li class=""><del>Building strings directly is error prone.</del></li>
     <li class=""><del>The contoller is overloaded.</del></li>
     <li class=""><del>Rails solves this problem already.</del></li>
     <li class="fragment fade-in">The model is overloaded.</li>
+    <li class="fragment fade-in">The view does not live in <code>app/views</code></li>
   </ul>
   <br/>
   <img src="img/rage.png" alt="wat." class="fragment fade-in"/>
+</section>
+
+<section>
+  <h1>C'mon, Rails...</h1>
+  <img src="img/yuno_view.jpg" alt="json!" class="fragment fade-in"/>
 </section>
 
 <section>
@@ -337,10 +345,12 @@ end
 
 <section>
   <pre><code class="ruby">
+  # Gemfile
   gem "rabl"
   </code></pre>
 
   <pre class="fragment fade-in"><code class="ruby">
+  # app/controllers/posts_controller.rb
   class PostsController < ApplicationController
     def show
       @post = Post.find(params[:id])
@@ -350,7 +360,15 @@ end
 
   <pre class="fragment fade-in"><code class="ruby">
   # app/views/posts/show.json.rabl
+  object @post
   attributes :title, :body
+  </code></pre>
+
+  <pre class="fragment fade-in"><code class="json">
+  {
+    "title":"Just a test",
+    "body":"Here's a bit of text for the \"body\"."
+  }
   </code></pre>
 
 </section>
@@ -363,6 +381,7 @@ end
     <li class=""><del>The contoller is overloaded.</del></li>
     <li class=""><del>Rails solves this problem already.</del></li>
     <li class=""><del>The model is overloaded.</del></li>
+    <li class=""><del>The view does not live in <code>app/views</code></del></li>
   </ul>
 </section>
 
@@ -371,15 +390,141 @@ end
 </section>
 
 <section>
+  <h3>What about comments?</h3>
+  <br />
+  <img src="img/deeper.jpg" alt="json!" class="fragment fade-in"/>
+</section>
+
+<section>
+  <pre><code>
+  rails g scaffold comment body:text username:text
+  </code></pre>
+  
+  <pre><code class="ruby">
+  class Comment < ActiveRecord::Base
+    belongs_to :post
+  end
+  </code></pre>
+
+  <pre><code class="ruby">
+  class Post < ActiveRecord::Base
+    has_many :comments
+  end
+  </code></pre>
+</section>
+
+<section>
+  <pre><code class="ruby">
+  # app/views/posts/show.json.rabl
+  object @post
+  attributes :title, :body
+
+  child :comments do
+    attributes :body, :username
+  end
+  </code></pre>
+
+  <pre class="fragment fade-in"><code class="json">
+  {
+    "title":"Just a test",
+    "body":"Here's a bit of text for the \"body\".",
+    "comments" : [
+      {"username" : "Jane D'oh", "body" : "This post is lame!"},
+      {"username" : "Joe Blow", "body" : "Totally super lame..."}
+    ]
+  }
+  </code></pre>
+</section>
+
+<section>
+  <h2>Let's refactor!</h2>
+  <img src="img/json_everywhere.jpg" alt="json!" class="fragment fade-in"/>
+</section>
+
+<section>
+  <pre><code class="ruby">
+  # app/views/comments/show.json.rabl
+  object @comment
+  attributes :body, :username
+  </code></pre>
+
+  <pre class="fragment fade-in"><code class="ruby">
+  # app/views/posts/show.json.rabl
+  object @post
+  attributes :title, :body
+
+  child :comments do
+    extends "comments/show"
+  end
+  </code></pre>
+
+  <pre class="fragment fade-in"><code class="json">
+  {
+    "title":"Just a test",
+    "body":"Here's a bit of text for the \"body\".",
+    "comments" : [
+      {"username" : "Jane D'oh", "body" : "This post is lame!"},
+      {"username" : "Joe Blow", "body" : "Totally super lame..."}
+    ]
+  }
+  </code></pre>
+</section>
+
+
+<section>
   <img src="img/oprah.jpg" alt="json!" />
 </section>
 
 <section>
-  <img src="img/plain_text.jpg" alt="json!" />
+  <h3>What about doing weird stuff?</h3>
+  <br />
+  <img src="img/json_strange.jpg" alt="json!" class="fragment fade-in"/>
+</section>
+
+
+<section>
+
+  <pre><code class="ruby">
+  # app/views/posts/show.json.rabl
+  object @post
+  attributes :title, :body
+
+  node :random_100 do
+    rand(100)
+  end
+
+  node :random_10 do
+    rand(100)
+  end
+  </code></pre>
+
+  <pre class="fragment fade-in"><code class="json">
+  {
+    "title":"Just a test",
+    "body":"Here's a bit of text for the \"body\".",
+    "random_100" : 42,
+    "random_10"  : 7
+  }
+  </code></pre>
 </section>
 
 <section>
-  <img src="img/json_everywhere.jpg" alt="json!" />
+  <img src="img/simple.jpg" alt="json!" class="fragment fade-in"/>
+</section>
+
+<section>
+  <h1>Other Options</h1>
+  <br/>
+  <ul>
+    <li><h3><code>ActiveModel::Serializers</code></h3></li>
+    <li><h3><code>Jbuilder</code></h3></li>
+  </ul>
+</section>
+
+
+
+<section>
+  <img src="img/plain_text.jpg" alt="json!" />
 </section>
 
 <section>
@@ -390,19 +535,8 @@ end
   <img src="img/jason.jpg" alt="json!" />
 </section>
 
-
-<section>
-  <img src="img/yuno_view.jpg" alt="json!" />
-</section>
-
 <section>
   <img src="img/yuno_json.jpg" alt="json!" />
-</section>
-
-
-
-<section>
-  <img src="img/deeper.jpg" alt="json!" />
 </section>
 
 <section>
@@ -412,14 +546,6 @@ end
 
 
 
-
-<section>
-  <img src="img/what_else.jpg" alt="json!" />
-</section>
-
-<section>
-  <img src="img/json_strange.jpg" alt="json!" />
-</section>
 
 
 
