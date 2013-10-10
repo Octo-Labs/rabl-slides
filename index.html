@@ -494,7 +494,7 @@ end
   end
 
   node :random_10 do
-    rand(100)
+    rand(10)
   end
   </code></pre>
 
@@ -505,6 +505,40 @@ end
     "random_100" : 42,
     "random_10"  : 7
   }
+  </code></pre>
+</section>
+
+<section>
+  <h3>What about caching?</h3>
+  <br />
+  <pre class="fragment fade-in"><code class="ruby">
+  # app/views/posts/show.json.rabl
+  object @post
+  cache @post
+  attributes :title, :body
+  </code></pre>
+</section>
+
+<section>
+  <h3>What about collection listings?</h3>
+  <br />
+  <pre class="fragment fade-in"><code class="ruby">
+  # app/views/posts/index.json.rabl
+  object @posts
+  cache @posts
+  extends "posts/show"
+  </code></pre>
+  <pre class="fragment fade-in"><code class="json">
+  [
+    {
+      "title":"Just a test",
+      "body":"Here's a bit of text for the \"body\"."
+    },
+    {
+      "title":"One more post",
+      "body":"Another useless post."
+    }
+  ]
   </code></pre>
 </section>
 
